@@ -10,11 +10,8 @@ def show_image(window_name: str, image):
     cv2.waitKey(0)
     cv2.destroyAllWindows
 
-def main():
-    paths = import_images()
-    img = cv2.imread(paths[9])
-    img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
-    hsv = cv2.cvtColor(img_resized, cv2.COLOR_BGR2HSV)
+def process_image(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     lower_blue = np.array([90, 50, 50])
     upper_blue = np.array([130, 255, 255])
@@ -36,7 +33,14 @@ def main():
 
     maskorange = cv2.inRange(hsv, lower_orange, upper_orange)
     
-    result = cv2.bitwise_and(img_resized, img_resized, mask=maskorange)
+    return cv2.bitwise_and(image, image, mask=maskorange)
+
+def main():
+    paths = import_images()
+    img = cv2.imread(paths[9])
+    img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
+
+    result = process_image(img_resized)
 
     show_image("Original", img_resized)
     show_image("Resultado", result)
