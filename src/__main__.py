@@ -11,6 +11,10 @@ def show_image(window_name: str, image):
     cv2.destroyAllWindows
 
 def process_image(image):
+    color_segmented_image = segment_image_by_color(image)
+    return color_segmented_image
+
+def segment_image_by_color(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     lower_blue = np.array([90, 50, 50])
