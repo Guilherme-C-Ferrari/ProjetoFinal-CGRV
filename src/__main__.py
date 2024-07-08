@@ -1,6 +1,10 @@
 import cv2 
 import numpy as np
 from glob import glob
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib import colors
 
 def import_images():
     return glob('assets/*.jpg')
@@ -19,36 +23,33 @@ def segment_image_by_color(image):
 
     lower_blue = np.array([90, 50, 50])
     upper_blue = np.array([130, 255, 255])
-
-    maskblue = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
 
     lower_red = np.array([0, 70, 50])
-    upper_red = np.array([10, 255, 255])
-
-    maskred = cv2.inRange(hsv, lower_red, upper_red)
+    upper_red = np.array([25, 255, 255])
+    mask_red = cv2.inRange(hsv, lower_red, upper_red)
 
     lower_red2 = np.array([170, 70, 50])
     upper_red2 = np.array([180, 255, 255])
-
-    maskred2 = cv2.inRange(hsv, lower_red2, upper_red2)
-
-    lower_orange = np.array([1, 190, 200])
-    upper_orange = np.array([18, 255, 255])
-
-    maskorange = cv2.inRange(hsv, lower_orange, upper_orange)
+    mask_red2 = cv2.inRange(hsv, lower_red2, upper_red2)
     
-    return cv2.bitwise_and(image, image, mask=maskorange)
+    masked_red = cv2.bitwise_and(image, image, mask=mask_red)
+    masked_red2 = cv2.bitwise_and(image, image, mask=mask_red2)
+    masked_blue = cv2.bitwise_and(image, image, mask=mask_blue)
+
+    masked_final = cv2.bitwise_or(masked_red, masked_red2)
+
+    return masked_final
 
 def main():
     paths = import_images()
-    img = cv2.imread(paths[9])
+    img = cv2.imread(paths[10])
     img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
 
     result = process_image(img_resized)
 
     show_image("Original", img_resized)
     show_image("Resultado", result)
-
 
 if __name__ == "__main__":
     main()
