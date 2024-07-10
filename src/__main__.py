@@ -2,14 +2,17 @@ import cv2
 import numpy as np
 from glob import glob
 
+# Função que retorna todos os caminhos das imagens em uma lista
 def import_images():
     return glob('assets/*.jpg')
 
+# Função que mostras as imagens em janelas
 def show_image(window_name: str, image):
     cv2.imshow(window_name, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows
 
+# Função que realiza o fluxo de PDI a partir das outraas funções existente, retornando a imagem final
 def process_image(image):
     upper_half, lower_half = split_image(image)
     segmented_upper_half, segmented_lower_half = segment_image_by_color(upper_half, lower_half)
@@ -17,6 +20,7 @@ def process_image(image):
     changed_color_image = change_color(reconnected_image)
     return apply_color_on_original(image, changed_color_image)
 
+# Função que divide a imagem, gerando uma parte de cima e uma de baixo
 def split_image(image):
     h = image.shape[0]
     half = h // 2
@@ -26,14 +30,18 @@ def split_image(image):
 
     return upper_half, lower_half
 
+# Função que reconecta a imagem dividida
 def reconnect_image(upper_half, lower_half):
     reconnected_image = cv2.vconcat([upper_half, lower_half])
     return reconnected_image
 
+# Função que segmenta a imagem em cima das cores escolhidas, retornando as duas partes segmentadas
 def segment_image_by_color(upper_half, lower_half):
+    # É gerada uma versão das duas partes em HSV
     hsv_upper = cv2.cvtColor(upper_half, cv2.COLOR_BGR2HSV)
     hsv_lower = cv2.cvtColor(lower_half, cv2.COLOR_BGR2HSV)
 
+    # São estabelecidos os limites mínimos e máximos de cor, sendoe estabelecidos quatro grupos de limites, dois para a parte de cima e dois para a parte de baixo
     limit_lo_red1 = np.array([0, 10, 50])
     limit_up_red1 = np.array([15, 255, 255])
     limit_lo_red2 = np.array([150, 10, 50])
@@ -44,6 +52,7 @@ def segment_image_by_color(upper_half, lower_half):
     limit_lo_red4 = np.array([170, 75, 50])
     limit_up_red4 = np.array([180, 255, 255])
 
+    # São criadas duas máscaras para cada parte, que geram duas imagens segmentadas que então são unidas e retornadas
     upper_half_mask_red = cv2.inRange(hsv_upper, limit_lo_red1, limit_up_red1)
     upper_half_mask_red2 = cv2.inRange(hsv_upper, limit_lo_red2, limit_up_red2)
     upper_half_masked_red = cv2.bitwise_and(upper_half, upper_half, mask=upper_half_mask_red)
@@ -58,6 +67,7 @@ def segment_image_by_color(upper_half, lower_half):
 
     return upper_half_masked_final, lower_half_masked_final
 
+# Recebe a imagem reunida, gerando uma versão HSV, alterando o valor de hue proporcionalmente nessa imagem, e devolvendo ela a um formato BGR
 def change_color(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -67,19 +77,22 @@ def change_color(image):
     
     return bgr
 
+# Aplica a cor na imagem original a partir da união da imagem alterada com uma versão segmentada de forma invertida a imagem original
 def apply_color_on_original(original_image, changed_color_image):
-
     null_value = np.array([0,0,0])
     inverted_mask = cv2.inRange(changed_color_image, null_value, null_value)
     inverted_masked = cv2.bitwise_and(original_image, original_image, mask=inverted_mask)
 
     return cv2.bitwise_or(inverted_masked, changed_color_image)
 
+# Chama a função de importação de imagens e inicia um loop para alterar todas as imagens listadas
 def main():
     paths = import_images()
 
     for path in paths:
         img = cv2.imread(path)
+
+        # Diminui o tamanho da imagem original proporcionalmente
         img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
 
         result = process_image(img_resized)
