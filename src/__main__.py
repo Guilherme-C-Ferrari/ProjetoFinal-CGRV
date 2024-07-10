@@ -39,9 +39,9 @@ def segment_image_by_color(upper_half, lower_half):
     limit_lo_red2 = np.array([150, 10, 50])
     limit_up_red2 = np.array([180, 255, 255])
 
-    limit_lo_red3 = np.array([0, 80, 50])
+    limit_lo_red3 = np.array([0, 75, 50])
     limit_up_red3 = np.array([15, 255, 255])
-    limit_lo_red4 = np.array([170, 80, 50])
+    limit_lo_red4 = np.array([170, 75, 50])
     limit_up_red4 = np.array([180, 255, 255])
 
     upper_half_mask_red = cv2.inRange(hsv_upper, limit_lo_red1, limit_up_red1)
@@ -86,14 +86,6 @@ def main():
 
         show_image("Original", img_resized)
         show_image("Resultado", result)
-
-    # img = cv2.imread(paths[2])
-    # img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
-
-    # result = process_image(img_resized)
-
-    # show_image("Original", img_resized)
-    # show_image("Resultado", result)
 
 if __name__ == "__main__":
     main()
