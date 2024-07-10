@@ -14,7 +14,8 @@ def process_image(image):
     upper_half, lower_half = split_image(image)
     segmented_upper_half, segmented_lower_half = segment_image_by_color(upper_half, lower_half)
     reconnected_image = reconnect_image(segmented_upper_half, segmented_lower_half)
-    return change_color(image, reconnected_image)
+    changed_color_image = change_color(reconnected_image)
+    return apply_color_on_original(image, changed_color_image)
 
 def split_image(image):
     h = image.shape[0]
@@ -57,36 +58,25 @@ def segment_image_by_color(upper_half, lower_half):
 
     return upper_half_masked_final, lower_half_masked_final
 
-# def blur_image(image):
-#     return cv2.blur(image, (5,5))
-
-# def sharpen_image(image):
-#     sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-#     return cv2.filter2D(image, -1, sharpen_kernel)
-
-def change_color(original_image, image):
-
+def change_color(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     h = (h + 70) % 180
     hsv_modificado = cv2.merge([h,s,v])
     bgr = cv2.cvtColor(hsv_modificado, cv2.COLOR_HSV2BGR)
+    
+    return bgr
+
+def apply_color_on_original(original_image, changed_color_image):
 
     null_value = np.array([0,0,0])
-    inverted_mask = cv2.inRange(bgr, null_value, null_value)
+    inverted_mask = cv2.inRange(changed_color_image, null_value, null_value)
     inverted_masked = cv2.bitwise_and(original_image, original_image, mask=inverted_mask)
 
-    return cv2.bitwise_or(inverted_masked, bgr)
+    return cv2.bitwise_or(inverted_masked, changed_color_image)
 
 def main():
     paths = import_images()
-    # img = cv2.imread(paths[10])
-    # img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
-
-    # result = process_image(img_resized)
-
-    # show_image("Original", img_resized)
-    # show_image("Resultado", result)
 
     for path in paths:
         img = cv2.imread(path)
@@ -96,6 +86,14 @@ def main():
 
         show_image("Original", img_resized)
         show_image("Resultado", result)
+
+    # img = cv2.imread(paths[2])
+    # img_resized = cv2.resize(img, None, fx=0.25, fy=0.25)
+
+    # result = process_image(img_resized)
+
+    # show_image("Original", img_resized)
+    # show_image("Resultado", result)
 
 if __name__ == "__main__":
     main()
